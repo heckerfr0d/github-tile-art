@@ -9,13 +9,13 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp
+    Sources/main.cpp \
+    Sources/mainwindow.cpp
 
 HEADERS += \
-    calendar.h \
-    font.h \
-    mainwindow.h
+    Headers/calendar.h \
+    Headers/font.h \
+    Headers/mainwindow.h
 
 static { # everything below takes effect with CONFIG = static
 
@@ -41,4 +41,4 @@ INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
 DEPENDPATH += $$PWD/../../libgit2-1.1.0/build
 
 RESOURCES += \
-    resources.qrc
+    Resources/resources.qrc

@@ -1,6 +1,6 @@
-#include "mainwindow.h"
-#include "calendar.h"
-#include "font.h"
+#include "headers/mainwindow.h"
+#include "headers/calendar.h"
+#include "headers/font.h"
 #include <QtWidgets>
 #include <fstream>
 #include <iostream>
