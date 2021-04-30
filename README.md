@@ -6,7 +6,7 @@ When pyinstaller stopped working for me (for some reason), I ported the app to C
   
 ## Usage
 
-[](https://github.com/heckerfr0d/github-tile-art/blob/main/resources/screenshot.png)  
+![screenshot](resources/screenshot.png)  
 
 This part is pretty self-explanatory (I think :p).  
 Username, password and email must be the ones corresponding to your github account.  
