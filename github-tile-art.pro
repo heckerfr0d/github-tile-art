@@ -34,11 +34,14 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-unix|win32: LIBS += -L$$PWD/../../libgit2-1.1.0/build/ -llibgit2.dll
+# Replace 'C:/Users/hadif/libgit2-1.1.0/build' with the path to built libgit2 library (libgit2.dll or libgit2.so)
+# And     'C:/Users/hadif/libgit2-1.1.0/include' with the path to git2.h
 
-INCLUDEPATH += $$PWD/../../libgit2-1.1.0/build
-INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
-DEPENDPATH += $$PWD/../../libgit2-1.1.0/build
+unix|win32: LIBS += -LC:/Users/hadif/libgit2-1.1.0/build/ -llibgit2.dll
+
+INCLUDEPATH += C:/Users/hadif/libgit2-1.1.0/build
+INCLUDEPATH += C:/Users/hadif/libgit2-1.1.0/include
+DEPENDPATH += C:/Users/hadif/libgit2-1.1.0/build
 
 RESOURCES += \
     Resources/resources.qrc
