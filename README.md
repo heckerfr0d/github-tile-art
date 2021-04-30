@@ -4,7 +4,9 @@
 A Qt C++ app to customize GitHub activity overview. Basically a C++ port of [this python GUI app](https://github.com/heckerfr0d/github-abuz).  
 When pyinstaller stopped working for me (for some reason), I ported the app to C++ (dum, I know 🙂). I thought it'd be easy (so naive 🤦). It obviously wasn't but I couldn't leave it unfinished (yes, vattaan :p) so here it is :')  
   
-## Usage
+## Instructions
+
+### Usage
 
 ![screenshot](resources/screenshot.png)  
 
@@ -18,6 +20,6 @@ Commits per day is, obviously, the number of commits you want the program to do 
 Once you're satisfied with the design (are we ever? :P), Just tell the app to `Do IT` and it will :relieved: .  
 **Note:** Depending on the number of commits it may take some time and the app may appear to not respond but don't worry, it's just creating all those commits in the background :grin:  
 
-## Build
+### Build
 
 README is still WIP, check back later for the build process 😁
