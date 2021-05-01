@@ -3,7 +3,6 @@
 #include "headers/font.h"
 #include <QtWidgets>
 #include <fstream>
-#include <iostream>
 #include <git2.h>
 
 QCheckBox *checkM[7][52];
@@ -88,13 +87,13 @@ MainWindow::MainWindow(QWidget *parent)
             background: solid #1c2128;\
             color: #f0f6fc;\
         }\
-                  QLineEdit[text=\"\"]{\
-                            border: 1px solid #30363d;\
-                            border-radius: 3px;\
-                            padding: 1px 18px 1px 3px;\
-                            background: solid #1c2128;\
-                      color: #8b949e;\
-                  }\
+        QLineEdit[text=\"\"]{\
+             border: 1px solid #30363d;\
+             border-radius: 3px;\
+             padding: 1px 18px 1px 3px;\
+             background: solid #1c2128;\
+             color: #8b949e;\
+        }\
         QLineEdit:hover {\
             border: 0.5px solid #c9d1d9;\
         }\
@@ -140,7 +139,6 @@ MainWindow::MainWindow(QWidget *parent)
         QCheckBox::indicator:checked:hover {\
             background-color: #00602d;\
         }\
-\
 \
         QComboBox {\
             border: 1px #30363d;\
@@ -222,8 +220,6 @@ MainWindow::MainWindow(QWidget *parent)
             border: none; /* no border for a flat push button */\
         }\
 \
-\
-\
         QScrollBar:vertical\
         {\
             background-color: #161b22;\
@@ -270,7 +266,6 @@ MainWindow::MainWindow(QWidget *parent)
             subcontrol-origin: margin;\
         }\
 \
-\
         QScrollBar::add-line:vertical:hover, QScrollBar::add-line:vertical:on\
         {\
             border: 0px;\
@@ -284,7 +279,6 @@ MainWindow::MainWindow(QWidget *parent)
         {\
             background: none;\
         }\
-\
 \
         QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical\
         {\
@@ -325,12 +319,12 @@ MainWindow::MainWindow(QWidget *parent)
             background: solid #30363d;\
         }\
         QSpinBox::down-button:focus {\
-        border: 1px solid #1f6fcb;\
-        border-top: 0px;\
+            border: 1px solid #1f6fcb;\
+            border-top: 0px;\
         }\
         QSpinBox::up-button:focus {\
-        border: 1px solid #1f6fcb;\
-        border-bottom: 0px;\
+            border: 1px solid #1f6fcb;\
+            border-bottom: 0px;\
         }\
         QSpinBox::down-arrow {\
             width: 7px;\
@@ -383,13 +377,13 @@ void MainWindow::translate()
     int tw=0;
     for(int i=0; i<n; i++)
     {
-        if(txt.find(str[i])!=txt.end())
+        if(txt.find(tolower(str[i]))!=txt.end())
         {
             str[i] = tolower(str[i]);
             tw += getwidth(txt[str[i]])+1;
         }
     }
-    if(tw > 52)
+    if(--tw > 52)
     {
         QMessageBox Q;
         Q.setWindowIcon(QIcon(":/icons/icon.png"));
@@ -406,7 +400,7 @@ void MainWindow::translate()
         {
             int cw = getwidth(txt[str[i]]);
             for(int k=0; k<7; k++)
-                for(int j=offset; j<51 && j<offset+static_cast<int>(txt[str[i]][j-offset].length()); j++)
+                for(int j=offset; j<offset+static_cast<int>(txt[str[i]][j-offset].length()); j++)
                     if(txt[str[i]][k][j-offset]!=' ')
                         checkM[k][j]->setChecked(true);
             offset += cw;
@@ -441,22 +435,20 @@ void MainWindow::doIT()
         Q.exec();
         return;
     }
-    git_repository *rep = NULL;
     const char *url = &repurl[0];
     const char *cname = &stdname[0];
     const char *cmail = &stdmail[0];
     char *path = &repname[0];
     git_libgit2_init();
+    git_repository *rep = NULL;
     git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
     git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
 
     checkout_opts.checkout_strategy = GIT_CHECKOUT_FORCE;
     clone_opts.checkout_opts = checkout_opts;
-    int error = git_clone(&rep, url, path, &clone_opts);
-    if (error < 0)
+    if (git_clone(&rep, url, path, &clone_opts) < 0)
     {
-        error = git_repository_open(&rep, path);
-        if(error<0)
+        if(git_repository_open(&rep, path)<0)
         {
             const git_error *err = giterr_last();
             if (err)
@@ -470,27 +462,19 @@ void MainWindow::doIT()
     }
     int n = dates.size();
     int m = nc->value();
-    const char* filepath = strcat(path, "/temp");
-    std::ofstream readme;
-    git_signature *me = NULL;
-    git_oid commit_oid, tree_oid;
-    git_tree *tree;
-    git_index *index;
-    git_object *parent = NULL;
-    git_reference *ref = NULL;
-    for (int i = 0; i < n; i++)
+
+    for (int i=0; i<n; i++)
     {
         for(int j=0; j<m; j++)
         {
-            // Write README file
-
-            readme.open(filepath, std::ios::app);
-            readme << std::to_string(std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count());
-            readme.close();
-
+            git_signature *me = NULL;
+            git_oid commit_oid, tree_oid;
+            git_tree *tree;
+            git_index *index;
+            git_object *parent = NULL;
+            git_reference *ref = NULL;
             git_revparse_ext(&parent, &ref, rep, "HEAD");
-            error = git_signature_new(&me, cname, cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 300);
-            if (error < 0)
+            if (git_signature_new(&me, cname, cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 120+j) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -502,8 +486,7 @@ void MainWindow::doIT()
                 }
             }
             git_repository_index(&index, rep);
-            error = git_index_add_bypath(index, "temp");
-            if (error < 0)
+            if (git_index_write_tree(&tree_oid, index) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -514,8 +497,7 @@ void MainWindow::doIT()
                     return;
                 }
             }
-            error = git_index_write_tree(&tree_oid, index);
-            if (error < 0)
+            if (git_tree_lookup(&tree, rep, &tree_oid) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -526,8 +508,7 @@ void MainWindow::doIT()
                     return;
                 }
             }
-            error = git_index_write(index);
-            if (error < 0)
+            if (git_commit_create_v(&commit_oid, rep, "HEAD", me, me, NULL, "just aesthetic commits :v:", tree, parent ? 1 : 0, parent) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -538,43 +519,20 @@ void MainWindow::doIT()
                     return;
                 }
             }
-            error = git_tree_lookup(&tree, rep, &tree_oid);
-            if (error < 0)
-            {
-                const git_error *err = giterr_last();
-                if (err)
-                {
-                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
-                    Q.setText(err->message);
-                    Q.exec();
-                    return;
-                }
-            }
-            error = git_commit_create_v(&commit_oid, rep, "HEAD", me, me, NULL, "git abuz", tree, parent ? 1 : 0, parent);
-            if (error < 0)
-            {
-                const git_error *err = giterr_last();
-                if (err)
-                {
-                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
-                    Q.setText(err->message);
-                    Q.exec();
-                    return;
-                }
-            }
+            git_index_free(index);
+            git_signature_free(me);
+            git_tree_free(tree);
+            git_object_free(parent);
+            git_reference_free(ref);
         }
     }
-    git_index_free(index);
-    git_signature_free(me);
-    git_tree_free(tree);
     git_push_options options;
     git_remote *remote = NULL;
     char *refspec = "refs/heads/master";
     const git_strarray refspecs = {
         &refspec,
         1};
-    error = git_remote_lookup(&remote, rep, "origin");
-    if (error < 0)
+    if (git_remote_lookup(&remote, rep, "origin") < 0)
     {
         const git_error *err = giterr_last();
         if (err)
@@ -585,8 +543,7 @@ void MainWindow::doIT()
             return;
         }
     }
-    error = git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION);
-    if (error < 0)
+    if (git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION) < 0)
     {
         const git_error *err = giterr_last();
         if (err)
@@ -597,8 +554,7 @@ void MainWindow::doIT()
             return;
         }
     }
-    error = git_remote_push(remote, &refspecs, &options);
-    if (error < 0)
+    if (git_remote_push(remote, &refspecs, &options) < 0)
     {
         const git_error *err = giterr_last();
         if (err)
@@ -610,7 +566,8 @@ void MainWindow::doIT()
         }
     }
     git_remote_free(remote);
+    git_repository_free(rep);
     Q.setWindowTitle("Success!");
-    Q.setText("Created " + QString::number(n) + " commits as " + name->text() + " in " + repo->text());
+    Q.setText("Created " + QString::number(n*m) + " commits as " + name->text() + " in " + repo->text());
     Q.exec();
 }
