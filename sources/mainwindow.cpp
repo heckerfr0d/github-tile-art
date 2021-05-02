@@ -386,7 +386,7 @@ void MainWindow::translate()
     if(--tw > 52)
     {
         QMessageBox Q;
-        Q.setWindowIcon(QIcon(":/icons/icon.png"));
+        Q.setWindowIcon(QIcon(":/icons/icon.ico"));
         Q.setWindowTitle("ERROR ");
         Q.setText("You typed too long :(");
         Q.exec();
@@ -418,7 +418,7 @@ void MainWindow::doIT()
     else
         dates = get_active_dates(dates_by_weekday());
     QMessageBox Q;
-    Q.setWindowIcon(QIcon(":/icons/icon.png"));
+    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
     std::string repurl = repo->text().toStdString();
     std::string stdname = name->text().toStdString();
     std::string stdmail = email->text().toStdString();
