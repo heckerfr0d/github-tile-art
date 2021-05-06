@@ -5,8 +5,7 @@
 #include <tuple>
 
 struct Config{
-    char url[80], cname[80], cmail[80];
-    char path[80];
+    char url[100], cname[50], cmail[80], path[50], auth[50];
     int nc;
 };
 
