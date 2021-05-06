@@ -4,6 +4,15 @@
 #include <vector>
 #include <tuple>
 
+struct Config{
+    char url[100], cname[50], cmail[80], path[50], auth[50];
+    int nc;
+};
+
+struct Art{
+    bool a[7][52];
+};
+
 // Returns day of week in civil calendar [0, 6] -> [Sun, Sat]
 // Preconditions:  z is number of days since 1970-01-01 and is in the range:
 //                   [numeric_limits<Int>::min(), numeric_limits<Int>::max()-4].

@@ -18,68 +18,8 @@ get_active_dates(std::vector<std::vector<std::chrono::system_clock::time_point>>
     return ad;
 }
 
-MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent)
-{
-    setWindowTitle("GitHub Abuz!");
-    y = new QComboBox();
-    int yd = std::get<0>(civil_from_days(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)));
-    y->addItem("Year (default: last 52 weeks)");
-    for (int i = yd+3; i > yd-20; i--)
-        y->addItem(QString::number(i));
-    nc = new QSpinBox();
-    nc->setMinimum(1);
-    nc->setValue(1);
-    name = new QLineEdit();
-    name->setPlaceholderText("Username");
-    email = new QLineEdit();
-    email->setPlaceholderText("Email");
-    repo = new QLineEdit();
-    repo->setPlaceholderText("Link to repo");
-    type = new QLineEdit();
-    type->setPlaceholderText("Translate text to tile art!");
-    pass = new QLineEdit();
-    pass->setPlaceholderText("Password");
-    pass->setEchoMode(QLineEdit::Password);
-    preview = new QPushButton(tr("Translate!"));
-    invert = new QPushButton(tr("Invert"));
-    doit = new QPushButton(tr("Do IT"));
-    QLabel *lbl = new QLabel;
-    lbl->setText("Commits/day:");
-    QGridLayout *l = new QGridLayout;
-    for (int i = 0; i < 7; i++)
-    {
-        for (int j = 0; j < 52; j++)
-        {
-            checkM[i][j] = new QCheckBox();
-            l->addWidget(checkM[i][j], i, j);
-        }
-    }
-    QHBoxLayout *h = new QHBoxLayout;
-    h->addWidget(name);
-    h->addWidget(email);
-    h->addWidget(pass);
-    QHBoxLayout *h3 = new QHBoxLayout;
-    h3->addWidget(repo);
-    h3->addWidget(y);
-    h3->addWidget(lbl);
-    h3->addWidget(nc);
-    QHBoxLayout *h2 = new QHBoxLayout;
-    h2->addWidget(type);
-    h2->addWidget(preview);
-    h2->addWidget(invert);
-    QVBoxLayout *v = new QVBoxLayout;
-    v->addLayout(h);
-    v->addLayout(h3);
-    v->addLayout(l);
-    v->addLayout(h2);
-    v->addWidget(doit);
-    setLayout(v);
-    connect(doit, SIGNAL(released()), this, SLOT(doIT()));
-    connect(invert, SIGNAL(released()), this, SLOT(inv()));
-    connect(preview, SIGNAL(released()), this, SLOT(translate()));
 
-    setStyleSheet("\
+const QString stylesheet = "\
         QLineEdit{\
             border: 1px solid #30363d;\
             border-radius: 3px;\
@@ -96,9 +36,15 @@ MainWindow::MainWindow(QWidget *parent)
         }\
         QLineEdit:hover {\
             border: 0.5px solid #c9d1d9;\
+            border-radius: 3px;\
+            padding: 1px 18px 1px 3px;\
+            background: solid #1c2128;\
         }\
         QLineEdit:focus {\
             border: 1px solid #1f6fcb;\
+            border-radius: 3px;\
+            padding: 1px 18px 1px 3px;\
+            background: solid #1c2128;\
         }\
         QWidget{\
             background-color: #0d1117;\
@@ -331,12 +277,75 @@ MainWindow::MainWindow(QWidget *parent)
             height: 7px;\
             background: solid black;\
         }\
-        ");
+        ";
+
+MainWindow::MainWindow(QWidget *parent)
+    : QWidget(parent)
+{
+    setWindowTitle("GitHub Abuz!");
+    y = new QComboBox();
+    int yd = std::get<0>(civil_from_days(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)));
+    y->addItem("Year (default: last 52 weeks)");
+    for (int i = yd+3; i > yd-20; i--)
+        y->addItem(QString::number(i));
+    nc = new QSpinBox();
+    nc->setMinimum(1);
+    nc->setValue(1);
+    name = new QLineEdit();
+    name->setPlaceholderText("Username");
+    email = new QLineEdit();
+    email->setPlaceholderText("Email");
+    repo = new QLineEdit();
+    repo->setPlaceholderText("Link to repo");
+    type = new QLineEdit();
+    type->setPlaceholderText("Translate text to tile art!");
+    pass = new QLineEdit();
+    pass->setPlaceholderText("Password");
+    pass->setEchoMode(QLineEdit::Password);
+    preview = new QPushButton(tr("Translate!"));
+    invert = new QPushButton(tr("Invert"));
+    doit = new QPushButton(tr("Do IT"));
+    QLabel *lbl = new QLabel;
+    lbl->setText("Commits/day:");
+    QGridLayout *l = new QGridLayout;
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 52; j++)
+        {
+            checkM[i][j] = new QCheckBox();
+            l->addWidget(checkM[i][j], i, j);
+        }
+    }
+    QHBoxLayout *h = new QHBoxLayout;
+    h->addWidget(name);
+    h->addWidget(email);
+    h->addWidget(pass);
+    QHBoxLayout *h3 = new QHBoxLayout;
+    h3->addWidget(repo);
+    h3->addWidget(y);
+    h3->addWidget(lbl);
+    h3->addWidget(nc);
+    QHBoxLayout *h2 = new QHBoxLayout;
+    h2->addWidget(type);
+    h2->addWidget(preview);
+    h2->addWidget(invert);
+    QVBoxLayout *v = new QVBoxLayout;
+    v->addLayout(h);
+    v->addLayout(h3);
+    v->addLayout(l);
+    v->addLayout(h2);
+    v->addWidget(doit);
+    setLayout(v);
+    connect(doit, SIGNAL(released()), this, SLOT(doIT()));
+    connect(invert, SIGNAL(released()), this, SLOT(inv()));
+    connect(preview, SIGNAL(released()), this, SLOT(translate()));
+    setStyleSheet(stylesheet);
     connect(name, &QLineEdit::textChanged, [=]{ style()->polish(name); });
     connect(email, &QLineEdit::textChanged, [=]{ style()->polish(email); });
     connect(pass, &QLineEdit::textChanged, [=]{ style()->polish(pass); });
     connect(repo, &QLineEdit::textChanged, [=]{ style()->polish(repo); });
     connect(type, &QLineEdit::textChanged, [=]{ style()->polish(type); });
+    connect(type, SIGNAL(returnPressed()), preview, SLOT(animateClick()));
     connect(nc, &QSpinBox::valueChanged, [=]{ style()->polish(nc); });
 }
 
@@ -349,6 +358,11 @@ MainWindow::~MainWindow()
     delete type;
     delete preview;
     delete doit;
+    delete pass;
+    delete nc;
+    for(int i=0; i<7; i++)
+        for(int j=0; j<52; j++)
+            delete checkM[i][j];
 }
 
 void MainWindow::inv()
@@ -410,19 +424,30 @@ void MainWindow::translate()
     }
 }
 
+Art getcheck()
+{
+    Art A;
+    for (int i = 0; i < 7; i++)
+        for (int j = 0; j < 52; j++)
+            if (checkM[i][j]->isChecked())
+                A.a[i][j] = 1;
+            else
+                A.a[i][j] = 0;
+    return A;
+}
+
+
 void MainWindow::doIT()
 {
+    Config c;
     std::vector<std::chrono::system_clock::time_point> dates;
-    if(y->currentText().toInt())
-        dates = get_active_dates(dates_by_weekday(y->currentText().toInt()));
-    else
-        dates = get_active_dates(dates_by_weekday());
-    QMessageBox Q;
-    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
     std::string repurl = repo->text().toStdString();
     std::string stdname = name->text().toStdString();
     std::string stdmail = email->text().toStdString();
     std::string repname;
+    QMessageBox Q;
+    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
+    Q.setStyleSheet(stylesheet);
     if(repurl!="" && repurl.find('/')!=std::string::npos)
     {
         repname = repurl.substr(repurl.find_last_of('/')+1, repurl.back());
@@ -435,10 +460,16 @@ void MainWindow::doIT()
         Q.exec();
         return;
     }
-    const char *url = &repurl[0];
-    const char *cname = &stdname[0];
-    const char *cmail = &stdmail[0];
-    char *path = &repname[0];
+    strncpy(c.url, repurl.c_str(), 100);
+    strncpy(c.cname, stdname.c_str(), 50);
+    strncpy(c.cmail, stdmail.c_str(), 80);
+    strncpy(c.path, repname.c_str(), 50);
+    c.nc = nc->value();
+    if(y->currentText().toInt())
+        dates = get_active_dates(dates_by_weekday(y->currentText().toInt()));
+    else
+        dates = get_active_dates(dates_by_weekday());
+
     git_libgit2_init();
     git_repository *rep = NULL;
     git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
@@ -446,9 +477,9 @@ void MainWindow::doIT()
 
     checkout_opts.checkout_strategy = GIT_CHECKOUT_FORCE;
     clone_opts.checkout_opts = checkout_opts;
-    if (git_clone(&rep, url, path, &clone_opts) < 0)
+    if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
     {
-        if(git_repository_open(&rep, path)<0)
+        if(git_repository_open(&rep, c.path)<0)
         {
             const git_error *err = giterr_last();
             if (err)
@@ -458,14 +489,58 @@ void MainWindow::doIT()
                 Q.exec();
                 return;
             }
+            git_push_options options;
+            git_remote *remote = NULL;
+            char *refspec = "refs/heads/master";
+            const git_strarray refspecs = {
+                &refspec,
+                1};
+            if (git_remote_lookup(&remote, rep, "origin") < 0)
+            {
+                const git_error *err = giterr_last();
+                if (err)
+                {
+                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                    Q.setText(err->message);
+                    Q.exec();
+                    return;
+                }
+            }
+            if (git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION) < 0)
+            {
+                const git_error *err = giterr_last();
+                if (err)
+                {
+                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                    Q.setText(err->message);
+                    Q.exec();
+                    return;
+                }
+            }
+            if (git_remote_push(remote, &refspecs, &options) < 0)
+            {
+                char command[80] = "rmdir /s /Q ";
+                strncat(command, c.path, 80);
+                system(command);
+                if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
+                {
+                    const git_error *err = giterr_last();
+                    if (err)
+                    {
+                        Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                        Q.setText(err->message);
+                        Q.exec();
+                        return;
+                    }
+                }
+            }
+            git_remote_free(remote);
         }
     }
     int n = dates.size();
-    int m = nc->value();
-
     for (int i=0; i<n; i++)
     {
-        for(int j=0; j<m; j++)
+        for(int j=0; j<c.nc; j++)
         {
             git_signature *me = NULL;
             git_oid commit_oid, tree_oid;
@@ -474,7 +549,7 @@ void MainWindow::doIT()
             git_object *parent = NULL;
             git_reference *ref = NULL;
             git_revparse_ext(&parent, &ref, rep, "HEAD");
-            if (git_signature_new(&me, cname, cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 120+j) < 0)
+            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 120+j) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -566,8 +641,49 @@ void MainWindow::doIT()
         }
     }
     git_remote_free(remote);
-    git_repository_free(rep);
+    git_repository_free(rep);    
     Q.setWindowTitle("Success!");
-    Q.setText("Created " + QString::number(n*m) + " commits as " + name->text() + " in " + repo->text());
+    Q.setText("Created " + QString::number(n*c.nc) + " commits as " + name->text() + " in " + QString::fromStdString(repname) + ": " + repo->text());
     Q.exec();
+    if(!y->currentText().toInt())
+    {
+            Art aout = getcheck();
+            std::ifstream in("daily.dat");
+            std::fstream out;
+            out.open("daily.dat", std::ios::binary | std::ios::app);
+            if(!in.good())
+            {
+                in.close();
+                QDialog d;
+                QVBoxLayout v;
+                QHBoxLayout h;
+                QLabel l;
+                QLineEdit le;
+                QPushButton accept, reject;
+                accept.setText("OK");
+                reject.setText("Cancel");
+                accept.setDefault(true);
+                connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
+                connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
+                l.setText("Please go to <a href=\"https://github.com/settings/tokens\">https://github.com/settings/tokens</a> and generate a new token with 'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
+                l.setOpenExternalLinks(true);
+                le.setPlaceholderText("Personal Access Token");
+                v.addWidget(&l);
+                v.addWidget(&le);
+                h.addWidget(&accept);
+                h.addWidget(&reject);
+                v.addLayout(&h);
+                d.setLayout(&v);
+                d.setStyleSheet(stylesheet);
+                d.exec();
+                if (d.Accepted && !le.text().isEmpty())
+                {
+                    strncpy(c.auth, le.text().toStdString().c_str(), 50);
+                    out.write(reinterpret_cast<const char*>(&c), sizeof(c));
+                }
+            }
+            out.write(reinterpret_cast<const char*>(&aout), sizeof(aout));
+            out.flush();
+            out.close();
+        }
 }
