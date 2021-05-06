@@ -338,13 +338,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(doit, SIGNAL(released()), this, SLOT(doIT()));
     connect(invert, SIGNAL(released()), this, SLOT(inv()));
     connect(preview, SIGNAL(released()), this, SLOT(translate()));
-
     setStyleSheet(stylesheet);
     connect(name, &QLineEdit::textChanged, [=]{ style()->polish(name); });
     connect(email, &QLineEdit::textChanged, [=]{ style()->polish(email); });
     connect(pass, &QLineEdit::textChanged, [=]{ style()->polish(pass); });
     connect(repo, &QLineEdit::textChanged, [=]{ style()->polish(repo); });
     connect(type, &QLineEdit::textChanged, [=]{ style()->polish(type); });
+    connect(type, SIGNAL(returnPressed()), preview, SLOT(animateClick()));
     connect(nc, &QSpinBox::valueChanged, [=]{ style()->polish(nc); });
 }
 
@@ -488,6 +488,52 @@ void MainWindow::doIT()
                 Q.exec();
                 return;
             }
+            git_push_options options;
+            git_remote *remote = NULL;
+            char *refspec = "refs/heads/master";
+            const git_strarray refspecs = {
+                &refspec,
+                1};
+            if (git_remote_lookup(&remote, rep, "origin") < 0)
+            {
+                const git_error *err = giterr_last();
+                if (err)
+                {
+                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                    Q.setText(err->message);
+                    Q.exec();
+                    return;
+                }
+            }
+            if (git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION) < 0)
+            {
+                const git_error *err = giterr_last();
+                if (err)
+                {
+                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                    Q.setText(err->message);
+                    Q.exec();
+                    return;
+                }
+            }
+            if (git_remote_push(remote, &refspecs, &options) < 0)
+            {
+                char command[80] = "rmdir /s /Q ";
+                strncat(command, c.path, 80);
+                system(command);
+                if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
+                {
+                    const git_error *err = giterr_last();
+                    if (err)
+                    {
+                        Q.setWindowTitle("ERROR " + QString::number(err->klass));
+                        Q.setText(err->message);
+                        Q.exec();
+                        return;
+                    }
+                }
+            }
+            git_remote_free(remote);
         }
     }
     int n = dates.size();
@@ -594,7 +640,7 @@ void MainWindow::doIT()
         }
     }
     git_remote_free(remote);
-    git_repository_free(rep);
+    git_repository_free(rep);    
     Q.setWindowTitle("Success!");
     Q.setText("Created " + QString::number(n*c.nc) + " commits as " + name->text() + " in " + QString::fromStdString(repname) + ": " + repo->text());
     Q.exec();
@@ -613,6 +659,9 @@ void MainWindow::doIT()
                 QLabel l;
                 QLineEdit le;
                 QPushButton accept, reject;
+                accept.setText("OK");
+                reject.setText("Cancel");
+                accept.setDefault(true);
                 connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
                 connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
                 l.setText("Please go to <a href=\"https://github.com/settings/tokens\">https://github.com/settings/tokens</a> and generate a new token with 'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
