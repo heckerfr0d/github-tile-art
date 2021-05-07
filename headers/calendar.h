@@ -6,10 +6,10 @@
 
 struct Config{
     char url[100], cname[50], cmail[80], path[50], auth[50];
-    int nc;
 };
 
 struct Art{
+    int nc;
     bool a[7][52];
 };
 
@@ -113,7 +113,7 @@ dates_by_weekday()
     using namespace std;
     using namespace std::chrono;
     std::vector<std::vector<std::chrono::system_clock::time_point>> dates;
-    unsigned long long d = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)-372;
+    unsigned long long d = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)-367;
     const unsigned wd_1st = weekday_from_days(d);
     d += weekday_difference(0, wd_1st);
     typedef duration<int, ratio_multiply<hours::period, ratio<24>>> days;

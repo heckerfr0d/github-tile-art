@@ -11,10 +11,10 @@ std::vector<std::chrono::system_clock::time_point>
 get_active_dates(std::vector<std::vector<std::chrono::system_clock::time_point>> dates)
 {
     std::vector<std::chrono::system_clock::time_point> ad;
-    for (int i = 0; i < 7; i++)
-        for (int j = 0; j < 52; j++)
-            if (checkM[i][j]->isChecked())
-                ad.push_back(dates[i][j]);
+    for (int i = 0; i < 52; i++)
+        for (int j = 0; j < 7; j++)
+            if (checkM[j][i]->isChecked())
+                ad.push_back(dates[j][i]);
     return ad;
 }
 
@@ -305,6 +305,7 @@ MainWindow::MainWindow(QWidget *parent)
     preview = new QPushButton(tr("Translate!"));
     invert = new QPushButton(tr("Invert"));
     doit = new QPushButton(tr("Do IT"));
+    doit->setDefault(true);
     QLabel *lbl = new QLabel;
     lbl->setText("Commits/day:");
     QGridLayout *l = new QGridLayout;
@@ -464,7 +465,7 @@ void MainWindow::doIT()
     strncpy(c.cname, stdname.c_str(), 50);
     strncpy(c.cmail, stdmail.c_str(), 80);
     strncpy(c.path, repname.c_str(), 50);
-    c.nc = nc->value();
+    int cnc = nc->value();
     if(y->currentText().toInt())
         dates = get_active_dates(dates_by_weekday(y->currentText().toInt()));
     else
@@ -540,7 +541,7 @@ void MainWindow::doIT()
     int n = dates.size();
     for (int i=0; i<n; i++)
     {
-        for(int j=0; j<c.nc; j++)
+        for(int j=0; j<cnc; j++)
         {
             git_signature *me = NULL;
             git_oid commit_oid, tree_oid;
@@ -549,7 +550,7 @@ void MainWindow::doIT()
             git_object *parent = NULL;
             git_reference *ref = NULL;
             git_revparse_ext(&parent, &ref, rep, "HEAD");
-            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 120+j) < 0)
+            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count()+j*10, 330) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -572,6 +573,7 @@ void MainWindow::doIT()
                     return;
                 }
             }
+            git_index_free(index);
             if (git_tree_lookup(&tree, rep, &tree_oid) < 0)
             {
                 const git_error *err = giterr_last();
@@ -594,7 +596,6 @@ void MainWindow::doIT()
                     return;
                 }
             }
-            git_index_free(index);
             git_signature_free(me);
             git_tree_free(tree);
             git_object_free(parent);
@@ -643,11 +644,12 @@ void MainWindow::doIT()
     git_remote_free(remote);
     git_repository_free(rep);    
     Q.setWindowTitle("Success!");
-    Q.setText("Created " + QString::number(n*c.nc) + " commits as " + name->text() + " in " + QString::fromStdString(repname) + ": " + repo->text());
+    Q.setText("Created " + QString::number(n*cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\">" + QString::fromStdString(repname) + "</a>");
     Q.exec();
     if(!y->currentText().toInt())
     {
             Art aout = getcheck();
+            aout.nc = cnc;
             std::ifstream in("daily.dat");
             std::fstream out;
             out.open("daily.dat", std::ios::binary | std::ios::app);

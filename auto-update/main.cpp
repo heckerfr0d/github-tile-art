@@ -7,10 +7,10 @@ std::vector<std::chrono::system_clock::time_point> get_active_dates(Art A)
 {
     std::vector<std::vector<std::chrono::system_clock::time_point>> dates = dates_by_weekday();
     std::vector<std::chrono::system_clock::time_point> d;
-    for(int i=0; i<7; i++)
-        for(int j=0; j<52; j++)
-            if(A.a[i][j])
-                d.push_back(dates[i][j]);
+    for(int i=0; i<52; i++)
+        for(int j=0; j<7; j++)
+            if(A.a[j][i])
+                d.push_back(dates[j][i]);
     return d;
 }
 
@@ -32,16 +32,14 @@ int main()
     char curl[200] = "rmdir /s /Q ";
     strcat(curl, c.path);
     system(curl);
-    strcpy(curl, "");
-    strcat(curl, "curl -X DELETE -H \"Authorization: token ");
+    strcpy(curl, "curl -X DELETE -H \"Authorization: token ");
     strcat(curl, c.auth);
     strcat(curl, "\" https://api.github.com/repos/");
     strcat(curl, c.cname);
     strcat(curl, "/");
     strcat(curl, c.path);
     system(curl);
-    strcpy(curl, "");
-    strcat(curl, "curl -i -H \"Authorization: token ");
+    strcpy(curl, "curl -i -H \"Authorization: token ");
     strcat(curl, c.auth);
     strcat(curl, "\" -d \"{\\\"name\\\":\\\"");
     strcat(curl, c.path);
@@ -57,10 +55,9 @@ int main()
         if(git_repository_open(&rep, c.path)<0)
             return -1;
     int n = dates.size();
-
     for (int i=0; i<n; i++)
     {
-        for(int j=0; j<c.nc; j++)
+        for(int j=0; j<A[r].nc; j++)
         {
             git_signature *me = NULL;
             git_oid commit_oid, tree_oid;
@@ -69,16 +66,16 @@ int main()
             git_object *parent = NULL;
             git_reference *ref = NULL;
             git_revparse_ext(&parent, &ref, rep, "HEAD");
-            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count(), 120+j) < 0)
+            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count()+j*10, 330) < 0)
                 return -2;
             git_repository_index(&index, rep);
             if (git_index_write_tree(&tree_oid, index) < 0)
                 return -3;
+            git_index_free(index);
             if (git_tree_lookup(&tree, rep, &tree_oid) < 0)
                 return -4;
             if (git_commit_create_v(&commit_oid, rep, "HEAD", me, me, NULL, "just aesthetic commits :v:", tree, parent ? 1 : 0, parent) < 0)
                 return -5;
-            git_index_free(index);
             git_signature_free(me);
             git_tree_free(tree);
             git_object_free(parent);
@@ -99,5 +96,8 @@ int main()
         return -9;
     git_remote_free(remote);
     git_repository_free(rep);
+    strcpy(curl, "rmdir /s /Q ");
+    strcat(curl, c.path);
+    system(curl);
     return 0;
 }
