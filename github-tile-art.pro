@@ -37,7 +37,4 @@ INCLUDEPATH += $$PWD/../../libgit2-1.1.0/build
 INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
 DEPENDPATH += $$PWD/../../libgit2-1.1.0/build
 
-RESOURCES += \
-    resources/resources.qrc
-
 RC_ICONS = resources/icon.ico

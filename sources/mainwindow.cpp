@@ -159,6 +159,7 @@ const QString stylesheet = "\
         }\
 \
         QPushButton:hover {\
+            border: 0.5px solid #c9d1d9;\
             background-color: #30363d;\
         }\
 \
@@ -282,7 +283,7 @@ const QString stylesheet = "\
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
-    setWindowTitle("GitHub Abuz!");
+    setWindowTitle("Gitfitti!");
     y = new QComboBox();
     int yd = std::get<0>(civil_from_days(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)));
     y->addItem("Year (default: last 52 weeks)");
@@ -447,7 +448,7 @@ void MainWindow::doIT()
     std::string stdmail = email->text().toStdString();
     std::string repname;
     QMessageBox Q;
-    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
+//    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
     Q.setStyleSheet(stylesheet);
     if(repurl!="" && repurl.find('/')!=std::string::npos)
     {
@@ -490,52 +491,6 @@ void MainWindow::doIT()
                 Q.exec();
                 return;
             }
-            git_push_options options;
-            git_remote *remote = NULL;
-            char *refspec = "refs/heads/master";
-            const git_strarray refspecs = {
-                &refspec,
-                1};
-            if (git_remote_lookup(&remote, rep, "origin") < 0)
-            {
-                const git_error *err = giterr_last();
-                if (err)
-                {
-                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
-                    Q.setText(err->message);
-                    Q.exec();
-                    return;
-                }
-            }
-            if (git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION) < 0)
-            {
-                const git_error *err = giterr_last();
-                if (err)
-                {
-                    Q.setWindowTitle("ERROR " + QString::number(err->klass));
-                    Q.setText(err->message);
-                    Q.exec();
-                    return;
-                }
-            }
-            if (git_remote_push(remote, &refspecs, &options) < 0)
-            {
-                char command[80] = "rmdir /s /Q ";
-                strncat(command, c.path, 80);
-                system(command);
-                if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
-                {
-                    const git_error *err = giterr_last();
-                    if (err)
-                    {
-                        Q.setWindowTitle("ERROR " + QString::number(err->klass));
-                        Q.setText(err->message);
-                        Q.exec();
-                        return;
-                    }
-                }
-            }
-            git_remote_free(remote);
         }
     }
     int n = dates.size();
@@ -642,17 +597,20 @@ void MainWindow::doIT()
         }
     }
     git_remote_free(remote);
-    git_repository_free(rep);    
+    git_repository_free(rep);
+    char cmd[80] = "rmdir /s /Q ";
+    strcat(cmd, c.path);
+    system(cmd);
     Q.setWindowTitle("Success!");
-    Q.setText("Created " + QString::number(n*cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\">" + QString::fromStdString(repname) + "</a>");
+    Q.setText("Created " + QString::number(n*cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\" style=\"color:#58a6ff\">" + QString::fromStdString(repname) + "</a>");
     Q.exec();
     if(!y->currentText().toInt())
     {
             Art aout = getcheck();
             aout.nc = cnc;
-            std::ifstream in("daily.dat");
+            std::ifstream in("config.bin");
             std::fstream out;
-            out.open("daily.dat", std::ios::binary | std::ios::app);
+            out.open("config.bin", std::ios::binary | std::ios::app);
             if(!in.good())
             {
                 in.close();
@@ -667,7 +625,7 @@ void MainWindow::doIT()
                 accept.setDefault(true);
                 connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
                 connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
-                l.setText("Please go to <a href=\"https://github.com/settings/tokens\">https://github.com/settings/tokens</a> and generate a new token with 'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
+                l.setText("Please go to <a href=\"https://github.com/settings/tokens\" style=\"color:#58a6ff\">https://github.com/settings/tokens</a> and generate a new token with \n'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
                 l.setOpenExternalLinks(true);
                 le.setPlaceholderText("Personal Access Token");
                 v.addWidget(&l);

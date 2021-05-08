@@ -19,7 +19,7 @@ int main()
     Config c;
     Art a;
     std::vector<Art> A;
-    std::ifstream in("daily.dat", std::ios::binary);
+    std::ifstream in("config.bin", std::ios::binary);
     in.read((char*)&c, sizeof(c));
     while(!in.eof())
     {
@@ -29,10 +29,7 @@ int main()
     srand(time(0));
     int r = rand()%(A.size());
     std::vector<std::chrono::system_clock::time_point> dates = get_active_dates(A[r]);
-    char curl[200] = "rmdir /s /Q ";
-    strcat(curl, c.path);
-    system(curl);
-    strcpy(curl, "curl -X DELETE -H \"Authorization: token ");
+    char curl[200] = "curl -X DELETE -H \"Authorization: token ";
     strcat(curl, c.auth);
     strcat(curl, "\" https://api.github.com/repos/");
     strcat(curl, c.cname);
