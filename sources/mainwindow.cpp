@@ -3,6 +3,7 @@
 #include "headers/font.h"
 #include <QtWidgets>
 #include <fstream>
+#include <unistd.h>
 #include <git2.h>
 
 QCheckBox *checkM[7][52];
@@ -17,7 +18,6 @@ get_active_dates(std::vector<std::vector<std::chrono::system_clock::time_point>>
                 ad.push_back(dates[j][i]);
     return ad;
 }
-
 
 const QString stylesheet = "\
         QLineEdit{\
@@ -285,9 +285,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle("Gitfitti!");
     y = new QComboBox();
-    int yd = std::get<0>(civil_from_days(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())/(24*60*60)));
+    int yd = std::get<0>(civil_from_days(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) / (24 * 60 * 60)));
     y->addItem("Year (default: last 52 weeks)");
-    for (int i = yd+3; i > yd-20; i--)
+    for (int i = yd + 3; i > yd - 20; i--)
         y->addItem(QString::number(i));
     nc = new QSpinBox();
     nc->setMinimum(1);
@@ -342,13 +342,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(invert, SIGNAL(released()), this, SLOT(inv()));
     connect(preview, SIGNAL(released()), this, SLOT(translate()));
     setStyleSheet(stylesheet);
-    connect(name, &QLineEdit::textChanged, [=]{ style()->polish(name); });
-    connect(email, &QLineEdit::textChanged, [=]{ style()->polish(email); });
-    connect(pass, &QLineEdit::textChanged, [=]{ style()->polish(pass); });
-    connect(repo, &QLineEdit::textChanged, [=]{ style()->polish(repo); });
-    connect(type, &QLineEdit::textChanged, [=]{ style()->polish(type); });
+    connect(name, &QLineEdit::textChanged, [=] { style()->polish(name); });
+    connect(email, &QLineEdit::textChanged, [=] { style()->polish(email); });
+    connect(pass, &QLineEdit::textChanged, [=] { style()->polish(pass); });
+    connect(repo, &QLineEdit::textChanged, [=] { style()->polish(repo); });
+    connect(type, &QLineEdit::textChanged, [=] { style()->polish(type); });
     connect(type, SIGNAL(returnPressed()), preview, SLOT(animateClick()));
-    connect(nc, &QSpinBox::valueChanged, [=]{ style()->polish(nc); });
+    connect(nc, &QSpinBox::valueChanged, [=] { style()->polish(nc); });
 }
 
 MainWindow::~MainWindow()
@@ -362,18 +362,18 @@ MainWindow::~MainWindow()
     delete doit;
     delete pass;
     delete nc;
-    for(int i=0; i<7; i++)
-        for(int j=0; j<52; j++)
+    for (int i = 0; i < 7; i++)
+        for (int j = 0; j < 52; j++)
             delete checkM[i][j];
 }
 
 void MainWindow::inv()
 {
-    for(int i=0; i<7; i++)
+    for (int i = 0; i < 7; i++)
     {
-        for(int j=0; j<52; j++)
+        for (int j = 0; j < 52; j++)
         {
-            if(checkM[i][j]->isChecked())
+            if (checkM[i][j]->isChecked())
                 checkM[i][j]->setChecked(false);
             else
                 checkM[i][j]->setChecked(true);
@@ -383,23 +383,23 @@ void MainWindow::inv()
 
 void MainWindow::translate()
 {
-    for(int i=0; i<7; i++)
-        for(int j=0; j<52; j++)
+    for (int i = 0; i < 7; i++)
+        for (int j = 0; j < 52; j++)
             checkM[i][j]->setChecked(false);
     std::unordered_map<char, std::vector<std::string>> txt = init();
     std::string str = type->text().toStdString();
     int n = str.length();
     int offset = 1;
-    int tw=0;
-    for(int i=0; i<n; i++)
+    int tw = 0;
+    for (int i = 0; i < n; i++)
     {
-        if(txt.find(tolower(str[i]))!=txt.end())
+        if (txt.find(tolower(str[i])) != txt.end())
         {
             str[i] = tolower(str[i]);
-            tw += getwidth(txt[str[i]])+1;
+            tw += getwidth(txt[str[i]]) + 1;
         }
     }
-    if(--tw > 52)
+    if (--tw > 52)
     {
         QMessageBox Q;
         Q.setWindowIcon(QIcon(":/icons/icon.ico"));
@@ -409,18 +409,18 @@ void MainWindow::translate()
         return;
     }
     else
-        offset = (52-tw)/2;
-    for(int i=0; i<n; i++)
+        offset = (52 - tw) / 2;
+    for (int i = 0; i < n; i++)
     {
-        if(txt.find(str[i])!=txt.end())
+        if (txt.find(str[i]) != txt.end())
         {
             int cw = getwidth(txt[str[i]]);
-            for(int k=0; k<7; k++)
-                for(int j=offset; j<offset+static_cast<int>(txt[str[i]][j-offset].length()); j++)
-                    if(txt[str[i]][k][j-offset]!=' ')
+            for (int k = 0; k < 7; k++)
+                for (int j = offset; j < offset + static_cast<int>(txt[str[i]][j - offset].length()); j++)
+                    if (txt[str[i]][k][j - offset] != ' ')
                         checkM[k][j]->setChecked(true);
             offset += cw;
-            if(str[i]!=' ')
+            if (str[i] != ' ')
                 offset++;
         }
     }
@@ -438,7 +438,6 @@ Art getcheck()
     return A;
 }
 
-
 void MainWindow::doIT()
 {
     Config c;
@@ -448,12 +447,12 @@ void MainWindow::doIT()
     std::string stdmail = email->text().toStdString();
     std::string repname;
     QMessageBox Q;
-//    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
+    //    Q.setWindowIcon(QIcon(":/icons/icon.ico"));
     Q.setStyleSheet(stylesheet);
-    if(repurl!="" && repurl.find('/')!=std::string::npos)
+    if (repurl != "" && repurl.find('/') != std::string::npos)
     {
-        repname = repurl.substr(repurl.find_last_of('/')+1, repurl.back());
-        repurl.insert(8, stdname+":"+pass->text().toStdString()+"@");
+        repname = repurl.substr(repurl.find_last_of('/') + 1, repurl.back());
+        repurl.insert(8, stdname + ":" + pass->text().toStdString() + "@");
     }
     else
     {
@@ -467,7 +466,7 @@ void MainWindow::doIT()
     strncpy(c.cmail, stdmail.c_str(), 80);
     strncpy(c.path, repname.c_str(), 50);
     int cnc = nc->value();
-    if(y->currentText().toInt())
+    if (y->currentText().toInt())
         dates = get_active_dates(dates_by_weekday(y->currentText().toInt()));
     else
         dates = get_active_dates(dates_by_weekday());
@@ -481,7 +480,7 @@ void MainWindow::doIT()
     clone_opts.checkout_opts = checkout_opts;
     if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
     {
-        if(git_repository_open(&rep, c.path)<0)
+        if (git_repository_open(&rep, c.path) < 0)
         {
             const git_error *err = giterr_last();
             if (err)
@@ -494,9 +493,9 @@ void MainWindow::doIT()
         }
     }
     int n = dates.size();
-    for (int i=0; i<n; i++)
+    for (int i = 0; i < n; i++)
     {
-        for(int j=0; j<cnc; j++)
+        for (int j = 0; j < cnc; j++)
         {
             git_signature *me = NULL;
             git_oid commit_oid, tree_oid;
@@ -505,7 +504,7 @@ void MainWindow::doIT()
             git_object *parent = NULL;
             git_reference *ref = NULL;
             git_revparse_ext(&parent, &ref, rep, "HEAD");
-            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count()+j*10, 330) < 0)
+            if (git_signature_new(&me, c.cname, c.cmail, std::chrono::duration_cast<std::chrono::seconds>(dates[i].time_since_epoch()).count() + j * 10, 330) < 0)
             {
                 const git_error *err = giterr_last();
                 if (err)
@@ -602,48 +601,55 @@ void MainWindow::doIT()
     strcat(cmd, c.path);
     system(cmd);
     Q.setWindowTitle("Success!");
-    Q.setText("Created " + QString::number(n*cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\" style=\"color:#58a6ff\">" + QString::fromStdString(repname) + "</a>");
+    Q.setText("Created " + QString::number(n * cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\" style=\"color:#58a6ff\">" + QString::fromStdString(repname) + "</a>");
     Q.exec();
-    if(!y->currentText().toInt())
+    if (!y->currentText().toInt())
     {
-            Art aout = getcheck();
-            aout.nc = cnc;
-            std::ifstream in("config.bin");
-            std::fstream out;
-            out.open("config.bin", std::ios::binary | std::ios::app);
-            if(!in.good())
+        Art aout = getcheck();
+        aout.nc = cnc;
+        std::ifstream in("config.bin");
+        std::fstream out;
+        out.open("config.bin", std::ios::binary | std::ios::app);
+        if (!in.good())
+        {
+            in.close();
+            QDialog d;
+            QVBoxLayout v;
+            QHBoxLayout h;
+            QLabel l;
+            QLineEdit le;
+            QPushButton accept, reject;
+            accept.setText("OK");
+            reject.setText("Cancel");
+            accept.setDefault(true);
+            connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
+            connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
+            l.setText("Please go to <a href=\"https://github.com/settings/tokens\" style=\"color:#58a6ff\">https://github.com/settings/tokens</a> and generate a new token with \n'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
+            l.setOpenExternalLinks(true);
+            le.setPlaceholderText("Personal Access Token");
+            v.addWidget(&l);
+            v.addWidget(&le);
+            h.addWidget(&accept);
+            h.addWidget(&reject);
+            v.addLayout(&h);
+            d.setLayout(&v);
+            d.setStyleSheet(stylesheet);
+            d.exec();
+            if (d.Accepted && !le.text().isEmpty())
             {
-                in.close();
-                QDialog d;
-                QVBoxLayout v;
-                QHBoxLayout h;
-                QLabel l;
-                QLineEdit le;
-                QPushButton accept, reject;
-                accept.setText("OK");
-                reject.setText("Cancel");
-                accept.setDefault(true);
-                connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
-                connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
-                l.setText("Please go to <a href=\"https://github.com/settings/tokens\" style=\"color:#58a6ff\">https://github.com/settings/tokens</a> and generate a new token with \n'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
-                l.setOpenExternalLinks(true);
-                le.setPlaceholderText("Personal Access Token");
-                v.addWidget(&l);
-                v.addWidget(&le);
-                h.addWidget(&accept);
-                h.addWidget(&reject);
-                v.addLayout(&h);
-                d.setLayout(&v);
-                d.setStyleSheet(stylesheet);
-                d.exec();
-                if (d.Accepted && !le.text().isEmpty())
-                {
-                    strncpy(c.auth, le.text().toStdString().c_str(), 50);
-                    out.write(reinterpret_cast<const char*>(&c), sizeof(c));
-                }
+                strncpy(c.auth, le.text().toStdString().c_str(), 50);
+                out.write(reinterpret_cast<const char *>(&c), sizeof(c));
+                char command[200] = "echo start ";
+                char path[80];
+                _getcwd(path, 80);
+                strcat(command, path);
+                strcat(command, "\auto-update.exe > \"%HOMEPATH%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\start.bat\"");
+                system(command);
             }
-            out.write(reinterpret_cast<const char*>(&aout), sizeof(aout));
-            out.flush();
-            out.close();
         }
+        out.write(reinterpret_cast<const char *>(&aout), sizeof(aout));
+        out.flush();
+        out.close();
+
+    }
 }
