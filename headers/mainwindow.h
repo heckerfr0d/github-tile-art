@@ -7,6 +7,7 @@ class QPushButton;
 class QLineEdit;
 class QComboBox;
 class QSpinBox;
+class QCheckBox;
 
 class MainWindow : public QWidget
 {
@@ -22,6 +23,7 @@ private slots:
     void translate();
 private:
     QComboBox *y;
+    QCheckBox *au;
     QSpinBox *nc;
     QComboBox *fonts;
     QLineEdit *name;

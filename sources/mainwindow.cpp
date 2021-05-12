@@ -307,8 +307,34 @@ MainWindow::MainWindow(QWidget *parent)
     invert = new QPushButton(tr("Invert"));
     doit = new QPushButton(tr("Do IT"));
     doit->setDefault(true);
-    QLabel *lbl = new QLabel;
+    au = new QCheckBox();
+    au->setStyleSheet("QCheckBox::indicator {\
+                            width: 11px;\
+                            height: 11px;\
+                            border: 1px solid #30363d;\
+                            border-radius: 2px;\
+                        }\
+                    \
+                        QCheckBox::indicator:unchecked {\
+                            background-color: #1c2128;\
+                            opacity: 0.5;\
+                        }\
+                    \
+                        QCheckBox::indicator:unchecked:hover {\
+                            border: 1px solid #c9d1d9;\
+                            opacity: 1;\
+                        }\
+                    \
+                        QCheckBox::indicator:checked {\
+                            background-color: #f0f6fc;\
+                        }\
+                    \
+                        QCheckBox::indicator:checked:hover {\
+                            background-color: #c9d1d9;\
+                        }");
+    QLabel *lbl = new QLabel, *al = new QLabel;
     lbl->setText("Commits/day:");
+    al->setText("Auto Update?");
     QGridLayout *l = new QGridLayout;
     for (int i = 0; i < 7; i++)
     {
@@ -327,6 +353,8 @@ MainWindow::MainWindow(QWidget *parent)
     h3->addWidget(y);
     h3->addWidget(lbl);
     h3->addWidget(nc);
+    h3->addWidget(al);
+    h3->addWidget(au);
     QHBoxLayout *h2 = new QHBoxLayout;
     h2->addWidget(type);
     h2->addWidget(preview);
@@ -603,13 +631,12 @@ void MainWindow::doIT()
     Q.setWindowTitle("Success!");
     Q.setText("Created " + QString::number(n * cnc) + " commits as " + name->text() + " in <a href=\"" + repo->text() + "\" style=\"color:#58a6ff\">" + QString::fromStdString(repname) + "</a>");
     Q.exec();
-    if (!y->currentText().toInt())
+    if (!y->currentText().toInt() && au->isChecked())
     {
         Art aout = getcheck();
         aout.nc = cnc;
         std::ifstream in("config.bin");
         std::fstream out;
-        out.open("config.bin", std::ios::binary | std::ios::app);
         if (!in.good())
         {
             in.close();
@@ -620,12 +647,13 @@ void MainWindow::doIT()
             QLineEdit le;
             QPushButton accept, reject;
             accept.setText("OK");
-            reject.setText("Cancel");
+            reject.setText("Heck NO");
             accept.setDefault(true);
             connect(&accept, SIGNAL(released()), &d, SLOT(accept()));
             connect(&reject, SIGNAL(released()), &d, SLOT(reject()));
             l.setText("Please go to <a href=\"https://github.com/settings/tokens\" style=\"color:#58a6ff\">https://github.com/settings/tokens</a> and generate a new token with \n'repo' and 'delete_repo' scopes checked to configure the auto-update script.");
             l.setOpenExternalLinks(true);
+            l.setWordWrap(true);
             le.setPlaceholderText("Personal Access Token");
             v.addWidget(&l);
             v.addWidget(&le);
@@ -634,22 +662,34 @@ void MainWindow::doIT()
             v.addLayout(&h);
             d.setLayout(&v);
             d.setStyleSheet(stylesheet);
+            d.resize(420, 125);
             d.exec();
+            qDebug() << d.height() << d.width();
             if (d.Accepted && !le.text().isEmpty())
             {
+                out.open("config.bin", std::ios::binary | std::ios::app);
                 strncpy(c.auth, le.text().toStdString().c_str(), 50);
                 out.write(reinterpret_cast<const char *>(&c), sizeof(c));
-                char command[200] = "echo start ";
-                char path[80];
-                _getcwd(path, 80);
+                out.write(reinterpret_cast<const char *>(&aout), sizeof(aout));
+                out.flush();
+                out.close();
+                char command[300] = "echo ";
+                char path[120];
+                _getcwd(path, 120);
+                strcat(command, "cd ");
                 strcat(command, path);
-                strcat(command, "\auto-update.exe > \"%HOMEPATH%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\start.bat\"");
+                strcat(command, " && start /min auto-update.exe > \"%HOMEPATH%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\autostart.bat\"");
                 system(command);
             }
         }
-        out.write(reinterpret_cast<const char *>(&aout), sizeof(aout));
-        out.flush();
-        out.close();
+        else
+        {
+            in.close();
+            out.open("config.bin", std::ios::binary | std::ios::app);
+            out.write(reinterpret_cast<const char *>(&aout), sizeof(aout));
+            out.flush();
+            out.close();
+        }
 
     }
 }
