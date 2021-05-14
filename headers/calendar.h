@@ -4,14 +4,25 @@
 #include <vector>
 #include <tuple>
 
+
+//  holds the repo and auth details
 struct Config{
     char url[100], cname[50], cmail[80], path[50], auth[50];
 };
 
+
+//  holds the graffiti as a matrix
 struct Art{
-    int nc;
+    int nc, year;
     bool a[7][52];
 };
+
+
+//  comparison function to sort Arts by year
+bool cmp(Art a, Art b)
+{
+    return a.year<b.year;
+}
 
 // Returns day of week in civil calendar [0, 6] -> [Sun, Sat]
 // Preconditions:  z is number of days since 1970-01-01 and is in the range:
@@ -82,6 +93,8 @@ civil_from_days(Int z) noexcept
     return std::tuple<Int, unsigned, unsigned>(y + (m <= 2), m, d);
 }
 
+
+//  get the nth day of the week given month and year
 std::chrono::system_clock::time_point
 get_nth_dow_month_year(unsigned n, unsigned wd, unsigned month, int year)
 {
@@ -94,6 +107,8 @@ get_nth_dow_month_year(unsigned n, unsigned wd, unsigned month, int year)
     return system_clock::time_point(days(d));
 }
 
+
+//  get a matrix of dates by weekday given year
 std::vector<std::vector<std::chrono::system_clock::time_point>>
 dates_by_weekday(int year)
 {
@@ -107,6 +122,8 @@ dates_by_weekday(int year)
     return dates;
 }
 
+
+//  get a matrix of dates by weekday of the last 52 weeks
 std::vector<std::vector<std::chrono::system_clock::time_point>>
 dates_by_weekday()
 {

@@ -31,10 +31,11 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+# path to your built libgit2 library file
 unix|win32: LIBS += -L$$PWD/../../libgit2-1.1.0/build/ -llibgit2.dll
 
-INCLUDEPATH += $$PWD/../../libgit2-1.1.0/build
+# path to the libgit2 include folder
 INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
-DEPENDPATH += $$PWD/../../libgit2-1.1.0/build
+DEPENDPATH += $$PWD/../../libgit2-1.1.0/include
 
 RC_ICONS = resources/icon.ico

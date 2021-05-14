@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <string>
 
+
+//  initialize a dictionary that maps characters to matrices
 std::unordered_map<char, std::vector<std::string>> init()
 {
     std::unordered_map<char, std::vector<std::string>> txt;
@@ -362,6 +364,8 @@ std::unordered_map<char, std::vector<std::string>> init()
     return txt;
 }
 
+
+//  get the width of a character matrix
 int getwidth(std::vector<std::string> s)
 {
     int n = s.size(), m = 0;
