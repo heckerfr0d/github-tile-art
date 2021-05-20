@@ -129,9 +129,9 @@ int main()
     //  create the repo using curl
     strcpy(curl, "curl -i -H \"Authorization: token ");
     strcat(curl, c.auth);
-    strcat(curl, "\" -d \"{\\\"name\\\":\\\"");
+    strcat(curl, "\" -d '{\"name\":\"");
     strcat(curl, c.path);
-    strcat(curl, "\\\",\\\"description\\\":\\\"A repo for GitHub graffiti\\\"}\" https://api.github.com/user/repos");
+    strcat(curl, "\",\"description\":\"A repo for GitHub graffiti\"}' https://api.github.com/user/repos");
     system(curl);
 
     git_libgit2_init();
@@ -144,7 +144,7 @@ int main()
     makeCommits(c, A[r]);
 
     //  clean up
-    strcpy(curl, "rmdir /s /Q ");
+    strcpy(curl, "rm -rf ");
     strcat(curl, c.path);
     system(curl);
 

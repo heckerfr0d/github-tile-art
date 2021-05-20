@@ -16,26 +16,26 @@ HEADERS += \
     headers/calendar.h \
     headers/font.h \
     headers/mainwindow.h
+ #   QMAKE_LFLAGS += -static -s -Os
 
-static { # everything below takes effect with CONFIG = static
+#static { # everything below takes effect with CONFIG = static
 
-CONFIG+= static
-CONFIG += staticlib # this is needed if you create a static library, not a static executable
-DEFINES+= STATIC
-message("~~~ static build ~~~") # this is for information, that the static build is done
+#CONFIG+= static
+#CONFIG += staticlib # this is needed if you create a static library, not a static executable
+#DEFINES+= STATIC
+#message("~~~ static build ~~~") # this is for information, that the static build is done
 
-}
+#}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-# path to your built libgit2 library file
-unix|win32: LIBS += -L$$PWD/../../libgit2-1.1.0/build/ -llibgit2.dll
-
-# path to the libgit2 include folder
-INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
-DEPENDPATH += $$PWD/../../libgit2-1.1.0/include
-
 RC_ICONS = resources/icon.ico
+
+#unix:!macx: LIBS += -lgit2
+unix: LIBS += -L$$PWD/../libgit2-1.1.0/build/ -lgit2
+
+INCLUDEPATH += $$PWD/../libgit2-1.1.0/include
+DEPENDPATH += $$PWD/../libgit2-1.1.0/include

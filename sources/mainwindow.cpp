@@ -678,7 +678,7 @@ void MainWindow::doIT()
     git_repository_free(rep);
 
     //  clean up
-    char cmd[80] = "rmdir /s /Q ";
+    char cmd[80] = "rm -rf ";
     strcat(cmd, c.path);
     system(cmd);
 
@@ -690,6 +690,7 @@ void MainWindow::doIT()
     //  auto-update extras
     if (au->isChecked())
     {
+        system("chmod +x auto-update");
         Art aout = getcheck();
         if(y->currentText().toInt())
             aout.year = y->currentText().toInt();
@@ -737,13 +738,12 @@ void MainWindow::doIT()
                 out.flush();
                 out.close();
 
-                //  get path to auto-update.exe and create script to load it on startup
-                char command[300] = "echo ";
+                //  get path to auto-update and set a cron job to run it daily
+                char command[300] = "( (crontab -l || echo "")  ; echo \"@daily ";
                 char path[120];
-                _getcwd(path, 120);
-                strcat(command, "cd ");
+                getcwd(path, 120);
                 strcat(command, path);
-                strcat(command, " && start /min auto-update.exe > \"%HOMEPATH%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\autostart.bat\"");
+                strcat(command, "/auto-update\") | sort -u - | crontab -");
                 system(command);
             }
         }
