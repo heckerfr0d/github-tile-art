@@ -18,12 +18,9 @@ HEADERS += \
     headers/mainwindow.h
 
 static { # everything below takes effect with CONFIG = static
-
-CONFIG+= static
-CONFIG += staticlib # this is needed if you create a static library, not a static executable
-DEFINES+= STATIC
-message("~~~ static build ~~~") # this is for information, that the static build is done
-
+    CONFIG+= static
+    #CONFIG += staticlib # this is needed if you create a static library, not a static executable
+    DEFINES+= STATIC
 }
 
 # Default rules for deployment.
