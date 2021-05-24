@@ -1,5 +1,6 @@
 #include "../headers/calendar.h"
 #include <fstream>
+#include <unistd.h>
 #include <algorithm>
 #include <string.h>
 #include <git2.h>
@@ -103,9 +104,9 @@ int main()
     Config c;
     Art a;
     std::vector<Art> A, A2;
-
+    chdir(getenv("HOME"));
     //  read file
-    std::ifstream in("config.bin", std::ios::binary);
+    std::ifstream in("Documents/.config.bin", std::ios::binary);
     in.read((char*)&c, sizeof(c));
     while(!in.eof())
     {
@@ -116,21 +117,22 @@ int main()
             A2.push_back(a);
     }
     in.close();
-
+    char repname[50];
+    strncat(repname, c.path+10, 50);
     //  delete remote repo using curl
     char curl[200] = "curl -X DELETE -H \"Authorization: token ";
     strcat(curl, c.auth);
     strcat(curl, "\" https://api.github.com/repos/");
     strcat(curl, c.cname);
     strcat(curl, "/");
-    strcat(curl, c.path);
+    strcat(curl, repname);
     system(curl);
 
     //  create the repo using curl
     strcpy(curl, "curl -i -H \"Authorization: token ");
     strcat(curl, c.auth);
     strcat(curl, "\" -d '{\"name\":\"");
-    strcat(curl, c.path);
+    strcat(curl, repname);
     strcat(curl, "\",\"description\":\"A repo for GitHub graffiti\"}' https://api.github.com/user/repos");
     system(curl);
 

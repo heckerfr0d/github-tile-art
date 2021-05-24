@@ -7,7 +7,7 @@
 
 //  holds the repo and auth details
 struct Config{
-    char url[100], cname[50], cmail[80], path[50], auth[50];
+    char url[100], cname[50], cmail[80], path[80], auth[50];
 };
 
 

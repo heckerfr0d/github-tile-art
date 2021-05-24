@@ -5,6 +5,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <git2.h>
+#include <mach-o/dyld.h>
 
 QCheckBox *checkM[7][52];
 
@@ -520,10 +521,12 @@ void MainWindow::doIT()
         Q.exec();
         return;
     }
+    chdir(getenv("HOME"));
     strncpy(c.url, repurl.c_str(), 100);
     strncpy(c.cname, stdname.c_str(), 50);
     strncpy(c.cmail, stdmail.c_str(), 80);
-    strncpy(c.path, repname.c_str(), 50);
+    strncpy(c.path, "Documents/", 13);
+    strncat(c.path, repname.c_str(), 67);
     int cnc = nc->value();
     if (y->currentText().toInt())
         dates = get_active_dates(dates_by_weekday(y->currentText().toInt()));
@@ -542,6 +545,14 @@ void MainWindow::doIT()
     //  git clone
     if (git_clone(&rep, c.url, c.path, &clone_opts) < 0)
     {
+        const git_error *err = giterr_last();
+        if (err)
+        {
+            Q.setWindowTitle("ERROR " + QString::number(err->klass));
+            Q.setText(err->message);
+            Q.exec();
+            return;
+        }
         if (git_repository_open(&rep, c.path) < 0)
         {
             const git_error *err = giterr_last();
@@ -690,14 +701,13 @@ void MainWindow::doIT()
     //  auto-update extras
     if (au->isChecked())
     {
-        system("chmod +x auto-update");
         Art aout = getcheck();
         if(y->currentText().toInt())
             aout.year = y->currentText().toInt();
         else
             aout.year = -1;
         aout.nc = cnc;
-        std::ifstream in("config.bin");
+        std::ifstream in("Documents/.config.bin");
         std::fstream out;
         if (!in.good())
         {
@@ -731,19 +741,15 @@ void MainWindow::doIT()
             //  don't write config if Heck NO lol
             if (d.Accepted && !le.text().isEmpty())
             {
-                out.open("config.bin", std::ios::binary | std::ios::app);
+                out.open("Documents/.config.bin", std::ios::binary | std::ios::app);
                 strncpy(c.auth, le.text().toStdString().c_str(), 50);
                 out.write(reinterpret_cast<const char*>(&c), sizeof(c));
                 out.write(reinterpret_cast<const char*>(&aout), sizeof(aout));
                 out.flush();
                 out.close();
 
-                //  get path to auto-update and set a cron job to run it daily
-                char command[300] = "( (crontab -l || echo "")  ; echo \"@daily ";
-                char path[120];
-                getcwd(path, 120);
-                strcat(command, path);
-                strcat(command, "/auto-update\") | sort -u - | crontab -");
+                //  get path to auto-update and set a cron job to run it on startup
+                char command[] = "( (crontab -l || echo "")  ; echo \"@reboot open /Applications/auto-update.app\") | sort -u - | crontab -";
                 system(command);
             }
         }
@@ -769,7 +775,7 @@ void MainWindow::doIT()
                     A2.push_back(a);
                 }
                 in.close();
-                std::ofstream out("config.bin", std::ios::binary);
+                std::ofstream out("Documents/.config.bin", std::ios::binary);
                 out.write(reinterpret_cast<const char*>(&c2), sizeof(c2));
                 for(auto it : A2)
                     out.write(reinterpret_cast<const char*>(&it), sizeof(it));
@@ -780,7 +786,7 @@ void MainWindow::doIT()
             in.close();
 
             //  default graffiti can be appended
-            out.open("config.bin", std::ios::binary | std::ios::app);
+            out.open("Documents/.config.bin", std::ios::binary | std::ios::app);
             out.write(reinterpret_cast<const char*>(&aout), sizeof(aout));
             out.flush();
             out.close();

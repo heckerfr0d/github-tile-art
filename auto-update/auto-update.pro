@@ -9,6 +9,9 @@ SOURCES += \
 HEADERS += \
     ../headers/calendar.h
 
-RC_ICONS = ../resources/icon.ico
+ICON = ../resources/github-tile-art.icns
 
-unix:!macx: LIBS += -lgit2
+macx: LIBS += -L$$PWD/../../Downloads/libgit2-1.1.0/build/ -lgit2.1.1.0
+
+INCLUDEPATH += $$PWD/../../Downloads/libgit2-1.1.0/include
+DEPENDPATH += $$PWD/../../Downloads/libgit2-1.1.0/include
