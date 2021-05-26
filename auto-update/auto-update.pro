@@ -9,6 +9,9 @@ SOURCES += \
 HEADERS += \
     ../headers/calendar.h
 
-RC_ICONS = ../resources/icon.ico
+# path to libgit2.so and its include files
+unix: LIBS += -L$$PWD/../../libgit2-1.1.0/build/ -lgit2
 
-unix:!macx: LIBS += -lgit2
+INCLUDEPATH += $$PWD/../../libgit2-1.1.0/include
+DEPENDPATH += $$PWD/../../libgit2-1.1.0/include
+

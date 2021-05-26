@@ -738,10 +738,10 @@ void MainWindow::doIT()
                 out.flush();
                 out.close();
 
-                //  get path to auto-update and set a cron job to run it daily
-                char command[300] = "( (crontab -l || echo "")  ; echo \"@daily ";
-                char path[120];
-                getcwd(path, 120);
+                //  get path to auto-update and set a cron job to run it on startup
+                char command[240] = "( (crontab -l || echo "")  ; echo \"@reboot ";
+                char path[140];
+                getcwd(path, 140);
                 strcat(command, path);
                 strcat(command, "/auto-update\") | sort -u - | crontab -");
                 system(command);
